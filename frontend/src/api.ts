@@ -27,7 +27,15 @@ export async function ingestFile(file: File) {
   return res.json();
 }
 
-export async function healthCheck() {
-  const res = await fetch(`${BASE_URL}/health`);
-  return res.json();
+export async function healthCheck(): Promise<boolean> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 45000);
+  try {
+    const res = await fetch(`${BASE_URL}/health`, { signal: controller.signal });
+    return res.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
 }

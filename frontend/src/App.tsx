@@ -17,6 +17,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [backendOnline, setBackendOnline] = useState(false);
+  const [connecting, setConnecting] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,19 +26,29 @@ function App() {
 
   // Check backend health on mount
   useEffect(() => {
-    healthCheck()
-      .then(() => setBackendOnline(true))
-      .catch(() => setBackendOnline(false));
+    let cancelled = false;
+    const check = async () => {
+      const ok = await healthCheck();
+      if (!cancelled) {
+        setBackendOnline(ok);
+        setConnecting(null);
+      }
+    };
+    check();
+    return () => { cancelled = true; };
   }, []);
 
   const handleToggleBackend = () => {
     if (backendOnline) {
       setBackendOnline(false);
-    } else {
-      healthCheck()
-        .then(() => setBackendOnline(true))
-        .catch(() => setBackendOnline(false));
+      return;
     }
+    setConnecting("waking up...");
+    healthCheck().then((ok) => {
+      setBackendOnline(ok);
+      setConnecting(null);
+      if (!ok) setConnecting("connection failed");
+    });
   };
 
   const handleNewChat = () => {
@@ -145,16 +156,24 @@ function App() {
           </button>
           <button
             onClick={handleToggleBackend}
-            className="relative p-1.5 rounded-full transition-colors cursor-pointer"
-            title={backendOnline ? 'Backend online' : 'Backend offline'}
+            className="relative flex items-center gap-1.5 p-1.5 rounded-full transition-colors cursor-pointer group"
+            title={
+              connecting ? 'Connecting...' :
+              backendOnline ? 'Backend online — click to check' : 'Backend offline — click to wake'
+            }
           >
             <span
-              className={`block w-3 h-3 rounded-full animate-pulse ${
-                backendOnline
-                  ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]'
-                  : 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]'
+              className={`block w-3 h-3 rounded-full ${
+                connecting
+                  ? 'bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.6)]'
+                  : backendOnline
+                    ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]'
+                    : 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]'
               }`}
             />
+            <span className="hidden group-hover:inline text-[10px] text-gray-500">
+              {connecting || (backendOnline ? 'online' : 'offline')}
+            </span>
           </button>
         </div>
       </header>
