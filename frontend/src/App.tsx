@@ -3,7 +3,7 @@ import ChatMessage from './components/ChatMessage';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
 import { Vortex } from './components/ui/vortex';
-import { chat, ingestFile, healthCheck } from './api';
+import { chat, ingestFile } from './api';
 import type { Message } from './types';
 
 function SuzeLogo() {
@@ -16,40 +16,12 @@ function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [backendOnline, setBackendOnline] = useState(false);
-  const [connecting, setConnecting] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  // Check backend health on mount
-  useEffect(() => {
-    let cancelled = false;
-    const check = async () => {
-      const ok = await healthCheck();
-      if (!cancelled) {
-        setBackendOnline(ok);
-        setConnecting(null);
-      }
-    };
-    check();
-    return () => { cancelled = true; };
-  }, []);
-
-  const handleToggleBackend = () => {
-    if (backendOnline) {
-      setBackendOnline(false);
-      return;
-    }
-    setConnecting("waking up...");
-    healthCheck().then((ok) => {
-      setBackendOnline(ok);
-      setConnecting(null);
-      if (!ok) setConnecting("connection failed");
-    });
-  };
 
   const handleNewChat = () => {
     setMessages([]);
@@ -153,27 +125,6 @@ function App() {
               <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
               <path d="M3 12a9 9 0 0 0 15 6.7L21 16" />
             </svg>
-          </button>
-          <button
-            onClick={handleToggleBackend}
-            className="relative flex items-center gap-1.5 p-1.5 rounded-full transition-colors cursor-pointer group"
-            title={
-              connecting ? 'Connecting...' :
-              backendOnline ? 'Backend online — click to check' : 'Backend offline — click to wake'
-            }
-          >
-            <span
-              className={`block w-3 h-3 rounded-full ${
-                connecting
-                  ? 'bg-yellow-400 animate-pulse shadow-[0_0_8px_rgba(250,204,21,0.6)]'
-                  : backendOnline
-                    ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.6)]'
-                    : 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.6)]'
-              }`}
-            />
-            <span className="hidden group-hover:inline text-[10px] text-gray-500">
-              {connecting || (backendOnline ? 'online' : 'offline')}
-            </span>
           </button>
         </div>
       </header>
