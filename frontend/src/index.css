@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+/* ── Speed lines background ─────────────────────────── */
+@keyframes speed-lines {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-100vh); }
+}
+
+.speed-lines {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.speed-line {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(to top, transparent, rgba(255, 255, 255, 0.04));
+  animation: speed-lines linear infinite;
+}
+
+/* ── Scrollbar ──────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a2d; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3d; }
+
+/* ── Prose overrides for chat messages ──────────────── */
+.prose-invert code {
+  background: #1e1e21;
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
