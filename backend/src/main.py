@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.config import settings
+from src.config import settings, parse_cors
 from src.retrieval.vector_store import VectorStore
 from src.retrieval.hybrid_search import HybridSearch
 from src.retrieval.staged_filter import StagedFilter
@@ -44,7 +44,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=parse_cors(settings.cors_origins),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
