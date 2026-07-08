@@ -14,4 +14,4 @@ services:
       - key: PORT
         value: "8000"
       - key: CORS_ORIGINS
-        value: '["https://suze-frontend.vercel.app"]'
+        value: "https://suze-frontend.vercel.app,http://localhost:5173"
